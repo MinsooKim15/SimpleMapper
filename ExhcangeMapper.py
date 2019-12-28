@@ -2,8 +2,6 @@
 import os
 import sys
 import io
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 import pymysql
 import pandas as pd
@@ -11,17 +9,27 @@ import numpy as np
 from datetime import datetime
 import pandas as pd
 from sqlalchemy import create_engine
+import inspect,json
+
+path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+with open(path + '/config.json', 'r') as f:
+    config = json.load(f)
+
+sqlHost = config["host"]
+sqlUser = config["user"]
+sqlPasswd = config["passwd"]
+sqlDb = config["db"]
 
 conn = pymysql.connect(
-    host="ec2-15-164-165-119.ap-northeast-2.compute.amazonaws.com",
+    host= sqlHost,
     port=int(3306),
-    user="minsoo",
-    passwd="mysql1234",
-    db="eightDays",
+    user= sqlUser,
+    passwd= sqlPasswd,
+    db=sqlDb,
     charset='utf8mb4')
 
 exchange = pd.read_sql_query("SELECT * FROM rawExchange", conn)
-
+print("OKAY")
 
 # 중요 함수(Apply 또는 Agg에서 사용할 거)
 # 이동 평균 구하기
@@ -103,10 +111,9 @@ final_df["created"] = datetime.today()
 final_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 final_df["exchangeId"] = final_df.index + 1
 final_df["exchangeId"] = final_df["exchangeId"].apply(lambda x : str(x).zfill(4))
-final_df["exchangeId"] = "exchange" + final_df["exchangeId"] + str(datetime.today().year)[2:] + str(datetime.today().month).zfill(2) + str(datetime.today().day).zfill(2)
-
+final_df["exchangeId"] = "exchange_" + final_df["exchangeId"]  + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
 # print(final_df["rateDescription"])
 
-engine = create_engine("mysql+pymysql://minsoo:"+"mysql1234"+"@ec2-15-164-165-119.ap-northeast-2.compute.amazonaws.com/eightDays?charset=utf8mb4",encoding='utf-8')
+engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
-final_df.to_sql(name= "exchange", con= engine, if_exists = "replace", index = False)
+final_df.to_sql(name= "exchange", con= engine, if_exists = "append", index = False)
