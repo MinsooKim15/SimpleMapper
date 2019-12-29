@@ -29,7 +29,6 @@ conn = pymysql.connect(
     charset='utf8mb4')
 
 exchange = pd.read_sql_query("SELECT * FROM rawExchange", conn)
-print("OKAY")
 
 # 중요 함수(Apply 또는 Agg에서 사용할 거)
 # 이동 평균 구하기
@@ -112,7 +111,6 @@ final_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, mi
 final_df["exchangeId"] = final_df.index + 1
 final_df["exchangeId"] = final_df["exchangeId"].apply(lambda x : str(x).zfill(4))
 final_df["exchangeId"] = "exchange_" + final_df["exchangeId"]  + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
-# print(final_df["rateDescription"])
 
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
