@@ -11,6 +11,17 @@ path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 with open(path + '/config.json', 'r') as f:
     config = json.load(f)
 
+import logging
+mainLogger = logging.getLogger("mainMapper")
+mainLogger.setLevel(logging.INFO)
+streamHandler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+streamHandler.setFormatter(formatter)
+mainLogger.addHandler(streamHandler)
+fileHandler = logging.FileHandler(path + "/main.log")
+fileHandler.setFormatter(formatter)
+mainLogger.addHandler(fileHandler)
+
 sqlHost = config["host"]
 sqlUser = config["user"]
 sqlPasswd = config["passwd"]
@@ -94,3 +105,4 @@ final_df["created"] = datetime.today()
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
 final_df.to_sql(name= "flightPrice", con= engine, if_exists = "append", index = False)
+mainLogger.info("SQL Commit Done : FlightPrice " + str(final_df.shape[0]))

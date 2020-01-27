@@ -20,6 +20,19 @@ sqlUser = config["user"]
 sqlPasswd = config["passwd"]
 sqlDb = config["db"]
 
+
+import logging
+mainLogger = logging.getLogger("mainMapper")
+mainLogger.setLevel(logging.INFO)
+streamHandler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+streamHandler.setFormatter(formatter)
+mainLogger.addHandler(streamHandler)
+fileHandler = logging.FileHandler(path + "/main.log")
+fileHandler.setFormatter(formatter)
+mainLogger.addHandler(fileHandler)
+
+
 conn = pymysql.connect(
     host= sqlHost,
     port=int(3306),
@@ -115,3 +128,4 @@ final_df["exchangeId"] = "exchange_" + final_df["exchangeId"]  + "_" + str(datet
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
 final_df.to_sql(name= "exchange", con= engine, if_exists = "append", index = False)
+mainLogger.info("SQL Commit Done : Exchange " + str(final_df.shape[0]))
