@@ -35,7 +35,7 @@ conn = pymysql.connect(
     db=sqlDb,
     charset='utf8mb4')
 
-weather = pd.read_sql_query("select count(*) from rawWeatherGlobalSummary WHERE measureDate > '2016-12-30 00:00:00'", conn) #데이터 양이 많아서 EC2가 감당을 못한다.
+weather = pd.read_sql_query("select * from rawWeatherGlobalSummary WHERE measureDate > '2016-12-30 00:00:00'", conn) #데이터 양이 많아서 EC2가 감당을 못한다.
 seoulWeather = pd.read_sql_query("SELECT * FROM rawWeatherSeoulOnly", conn)
 seoulWeather = seoulWeather[seoulWeather.temperatureMax != -999.0]
 seoulToday = seoulWeather.sort_values("writeDate", ascending=False)[['temperature']].iloc[0,][0]
