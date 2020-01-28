@@ -36,12 +36,14 @@ conn = pymysql.connect(
     charset='utf8mb4')
 
 weather = pd.read_sql_query("select * from rawWeatherGlobalSummary WHERE measureDate > '2016-12-30 00:00:00'", conn) #데이터 양이 많아서 EC2가 감당을 못한다.
+
 seoulWeather = pd.read_sql_query("SELECT * FROM rawWeatherSeoulOnly", conn)
 seoulWeather = seoulWeather[seoulWeather.temperatureMax != -999.0]
 seoulToday = seoulWeather.sort_values("writeDate", ascending=False)[['temperature']].iloc[0,][0]
 
 weather["month"] = weather["measureDate"].dt.month
 weather["year"] = weather["measureDate"].dt.year
+weather = weather[weather["month"] == (datetime.now().month + 1)]
 
 summerCountryList = [
     "ID", #인도네시아
