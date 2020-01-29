@@ -1,3 +1,7 @@
+# 매일 서울 최신 날씨를 가져다가 WATHER 데이터에 입력합니다.
+
+
+
 import os
 import pymysql
 import pandas as pd
