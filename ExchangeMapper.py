@@ -11,6 +11,8 @@ import pandas as pd
 from sqlalchemy import create_engine
 import inspect,json
 
+#TODO : change python style code to pandas style
+
 path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 with open(path + '/config.json', 'r') as f:
     config = json.load(f)
@@ -103,6 +105,7 @@ new_df["mv500"] = exchange.groupby(["currencyUnit"])["basicRate(clean)","rateDat
 new_df["recentNum"] = new_df["mv5"] - new_df["mv10"]
 new_df["monthNum"] = new_df["mv10"] - new_df["mv20"]
 new_df["quarterNum"] = new_df["mv20"] - new_df["mv60"]
+new_df["score"] = 100 - ((new_df["mv5"] - new_df["mv500"]).clip(0))/2
 
 new_df["todayRate"] = exchange.groupby("currencyUnit")[["basicRate(clean)", "rateDate"]].agg(getRecent)["rateDate"]
 new_df["weekAgoRate"] = exchange.groupby("currencyUnit")[["basicRate(clean)", "rateDate"]].agg(getWeekAgo)["rateDate"]
@@ -112,20 +115,19 @@ new_df["1stSentence"] = new_df[["mv500", "todayRate"]].apply(makeFirstSentence, 
 new_df["2ndSentence"] = new_df[["mv5", "mv10", "mv60"]].apply(makeSecondSentence, axis=1)
 new_df = new_df.reset_index(level='currencyUnit')
 
-final_df = new_df
-final_df["rateTitle"] = np.nan
-final_df["rateDescription"] = final_df["1stSentence"] + " " + final_df["2ndSentence"]
+new_df["rateTitle"] = np.nan
+new_df["rateDescription"] = new_df["1stSentence"] + " " + new_df["2ndSentence"]
 # final_df["rateDescription"] = final_df["rateDescription"].str.encode('utf-8')
-final_df = final_df.drop(["mv5", "mv10", "mv20", "mv60", "mv500","recentNum", "monthNum", "quarterNum", "1stSentence", "2ndSentence"],axis=1)
+new_df = new_df.drop(["mv5", "mv10", "mv20", "mv60", "mv500","recentNum", "monthNum", "quarterNum", "1stSentence", "2ndSentence"],axis=1)
 currencyMap = pd.Series(exchange.currencyName.values, index = exchange.currencyUnit).to_dict()
-final_df["currencyName"] =  final_df["currencyUnit"].map(currencyMap)
-final_df["created"] = datetime.today()
-final_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-final_df["exchangeId"] = final_df.index + 1
-final_df["exchangeId"] = final_df["exchangeId"].apply(lambda x : str(x).zfill(4))
-final_df["exchangeId"] = "exchange_" + final_df["exchangeId"]  + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
+new_df["currencyName"] =  new_df["currencyUnit"].map(currencyMap)
+new_df["created"] = datetime.today()
+new_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+new_df["exchangeId"] = new_df.index + 1
+new_df["exchangeId"] = new_df["exchangeId"].apply(lambda x : str(x).zfill(4))
+new_df["exchangeId"] = "exchange_" + new_df["exchangeId"]  + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
 
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
-final_df.to_sql(name= "exchange", con= engine, if_exists = "append", index = False)
-mainLogger.info("SQL Commit Done : Exchange " + str(final_df.shape[0]))
+new_df.to_sql(name= "exchange", con= engine, if_exists = "append", index = False)
+mainLogger.info("SQL Commit Done : Exchange " + str(new_df.shape[0]))
