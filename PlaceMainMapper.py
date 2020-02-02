@@ -44,11 +44,11 @@ placeStatic["stateName"] = placeStatic["stateName"].fillna("no_state")
 placeStatic["stateCode"] = placeStatic["stateCode"].fillna("no_state")
 
 conn = pymysql.connect(
-    host="localhost",
+    host= sqlHost,
     port=int(3306),
-    user="root",
-    passwd="1234567890",
-    db="eightDays",
+    user= sqlUser,
+    passwd= sqlPasswd,
+    db=sqlDb,
     charset='utf8mb4')
 weather = pd.read_sql_query("SELECT * FROM weather", conn)
 conn.close()
@@ -57,11 +57,11 @@ weather = weather[weather["month"] == targetMonth]
 weather = weather.sort_values("created")
 weather.drop_duplicates(subset = ["country", "state"],keep = "last",inplace = True)
 conn = pymysql.connect(
-    host="localhost",
+    host= sqlHost,
     port=int(3306),
-    user="root",
-    passwd="1234567890",
-    db="eightDays",
+    user= sqlUser,
+    passwd= sqlPasswd,
+    db=sqlDb,
     charset='utf8mb4')
 
 exchange = pd.read_sql_query("SELECT * FROM exchange", conn)
@@ -70,11 +70,11 @@ exchange= exchange.sort_values("created")
 exchange.drop_duplicates(subset = ["currencyUnit"],keep = "last",inplace = True)
 exchange['currencyUnit'] = exchange['currencyUnit'].str.slice(0,3)
 conn = pymysql.connect(
-    host="localhost",
+    host= sqlHost,
     port=int(3306),
-    user="root",
-    passwd="1234567890",
-    db="eightDays",
+    user= sqlUser,
+    passwd= sqlPasswd,
+    db=sqlDb,
     charset='utf8mb4')
 
 flightPrice = pd.read_sql_query("SELECT * FROM flightPrice", conn)
