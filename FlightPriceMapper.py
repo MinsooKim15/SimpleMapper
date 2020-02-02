@@ -100,7 +100,7 @@ final_df["flightPriceId"] = final_df["flightPriceId"].apply(lambda x : str(x).zf
 final_df["flightPriceId"] = "flightPrice_" + final_df["flightPriceId"] + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
 final_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 final_df["created"] = datetime.today()
-
+final_df["score"] = 100 #점수가 10ㄷㄷ0 점으로 고정되어 있음 수정 필요
 
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
