@@ -40,6 +40,9 @@ datetime.now()
 # 아래 query는 가장 WriteDate가 최신인 APICALLID의 데이터만 가져오는것
 df = pd.read_sql_query("select * FROM RawFlightQuotes WHERE apiCallId IN (SELECT MAX(apiCallId) FROM RawFlightQuotes WHERE writeDate = (select MAX(writeDate) FROM RawFlightQuotes))", conn)
 # print(df.sort_values("writeDate", ascending = False)["writeDate"])
+if (df.shape[0] < 30):
+    mainLogger.warn("Not Enough API Call Data" + str(df.shape[0]))
+    raise ValueError("Not Enough API Call Data")
 recentWriteDate =  df.sort_values("writeDate", ascending = False)["writeDate"].iloc[0,]
 pd.to_datetime(recentWriteDate)
 recentWriteDate = recentWriteDate.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
@@ -83,6 +86,7 @@ cleaned_df= cleaned_df[(cleaned_df["quoteFirstDepartureDate"] > minDepartureDay)
 round_df = cleaned_df.apply(makeRoundTrip_temp, axis =1, result_type= 'expand')
 round_df= round_df.dropna()
 round_df = round_df.rename(columns = {0:"roundTripDate", 1:"roundTripPrice", 2:"targetAirport"})
+print(round_df)
 final_df = pd.pivot_table(
     round_df,
     index = "targetAirport",
