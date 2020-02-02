@@ -39,6 +39,7 @@ datetime.now()
 
 # 아래 query는 가장 WriteDate가 최신인 APICALLID의 데이터만 가져오는것
 df = pd.read_sql_query("select * FROM RawFlightQuotes WHERE apiCallId IN (SELECT MAX(apiCallId) FROM RawFlightQuotes WHERE writeDate = (select MAX(writeDate) FROM RawFlightQuotes))", conn)
+print(df.sort_values("writeDate", ascending = False)["writeDate"])
 recentWriteDate =  df.sort_values("writeDate", ascending = False)["writeDate"].iloc[1,]
 pd.to_datetime(recentWriteDate)
 recentWriteDate = recentWriteDate.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
