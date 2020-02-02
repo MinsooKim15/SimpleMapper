@@ -31,11 +31,11 @@ fileHandler.setFormatter(formatter)
 mainLogger.addHandler(fileHandler)
 
 conn = pymysql.connect(
-    host="localhost",
+    host= sqlHost,
     port=int(3306),
-    user="root",
-    passwd="1234567890",
-    db="eightDays",
+    user= sqlUser,
+    passwd= sqlPasswd,
+    db=sqlDb,
     charset='utf8mb4')
 
 placeStatic = pd.read_sql_query("SELECT * FROM placeStatic", conn)
