@@ -35,8 +35,10 @@ conn = pymysql.connect(
     db=sqlDb,
     charset='utf8mb4')
 
+datetime.now()
 
-df = pd.read_sql_query("SELECT * FROM RawFlightQuotes", conn)
+# 아래 query는 가장 WriteDate가 최신인 APICALLID의 데이터만 가져오는것
+df = pd.read_sql_query("select * FROM rawFlightQuotes WHERE apiCallId IN (SELECT MAX(apiCallId) FROM rawFlightQuotes WHERE writeDate = (select MAX(writeDate) FROM rawFlightQuotes))", conn)
 recentWriteDate =  df.sort_values("writeDate", ascending = False)["writeDate"].iloc[1,]
 pd.to_datetime(recentWriteDate)
 recentWriteDate = recentWriteDate.replace(hour = 0, minute = 0, second = 0, microsecond = 0)
@@ -100,7 +102,7 @@ final_df["flightPriceId"] = final_df["flightPriceId"].apply(lambda x : str(x).zf
 final_df["flightPriceId"] = "flightPrice_" + final_df["flightPriceId"] + "_" + str(datetime.now().strftime("%Y%m%d%H%M%S"))
 final_df["dateToShow"] = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 final_df["created"] = datetime.today()
-final_df["score"] = 100 #점수가 10ㄷㄷ0 점으로 고정되어 있음 수정 필요
+final_df["score"] = 100 #점수가 100 점으로 고정되어 있음 수정 필요
 
 engine = create_engine("mysql+pymysql://" +sqlUser +":"+sqlPasswd+"@"+sqlHost + "/" + sqlDb +"?charset=utf8mb4",encoding='utf-8')
 conn = engine.connect()
